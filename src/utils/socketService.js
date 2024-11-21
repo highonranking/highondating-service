@@ -10,12 +10,10 @@ const initializeSocket = (server) => {
   global.io = io; // Making io available globally for emitting events
 
   io.on('connection', (socket) => {
-    console.log('A user connected:', socket.id);
 
     // Join rooms for user-to-user or group communication
     socket.on('join_room', (roomId) => {
       socket.join(roomId);
-      console.log(`User joined room: ${roomId}`);
     });
 
     // Handle typing indicators
@@ -24,7 +22,6 @@ const initializeSocket = (server) => {
     });
 
     socket.on('disconnect', () => {
-      console.log('User disconnected:', socket.id);
     });
   });
 
