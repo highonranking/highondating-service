@@ -101,8 +101,9 @@ router.get('/', userAuth, async (req, res) => {
 
         const messages = await Message.find(query).sort({ timestamp: 1 });
 
-        await redisClient.set(cacheKey, JSON.stringify(messages), { EX: 60 * 5 });
-
+        await redisClient.set(cacheKey1, JSON.stringify(messagesCache), { EX: 60 * 5 }); 
+        await redisClient.set(cacheKey2, JSON.stringify(messagesCache), { EX: 60 * 5 }); 
+        
         res.status(200).json({ success: true, messages });
     } catch (error) {
         console.error("Server Error:", error);
