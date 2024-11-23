@@ -26,6 +26,7 @@ authRouter.post("/signup", async (req, res) => {
     sameSite: 'None', // Required for cross-origin
       expires: new Date(Date.now() + 8 * 3600000),
     });
+    console.log(req.cookies);
 
     res.json({ message: "User Added successfully!", data: savedUser });
   } catch (err) {
