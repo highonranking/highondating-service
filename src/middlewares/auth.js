@@ -6,6 +6,8 @@ require("dotenv").config();
 const userAuth = async (req, res, next) => {
   try {
     const { token } = req.cookies;
+    console.log("cooikes ", req.cookies)
+
     if (!token) {
       return res.status(401).send("Please Login!");
     }
