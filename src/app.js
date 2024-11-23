@@ -6,7 +6,7 @@ const cors = require("cors");
 
 app.use(
   cors({
-    origin: "https://highondating.vercel.app",
+    origin: "https://www.bookmyheart.in",
     credentials: true,
   })
 );
