@@ -26,7 +26,6 @@ authRouter.post("/signup", async (req, res) => {
     sameSite: 'None', // Required for cross-origin
       expires: new Date(Date.now() + 8 * 3600000),
     });
-    console.log(req.cookies);
 
     res.json({ message: "User Added successfully!", data: savedUser });
   } catch (err) {
@@ -53,7 +52,6 @@ authRouter.post("/login", async (req, res) => {
         sameSite: 'None', // Required for cross-origin
         expires: new Date(Date.now() + 8 * 3600000),
       });
-      console.log(req.cookies);
       res.send(user);
     } else {
       throw new Error("Invalid credentials");
@@ -71,7 +69,6 @@ authRouter.post("/logout", async (req, res) => {
     expires: new Date(Date.now()),
     
   });
-  console.log(req.cookies);
 
   res.send("Logout Successful!!");
 });

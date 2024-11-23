@@ -6,13 +6,11 @@ require("dotenv").config();
 const userAuth = async (req, res, next) => {
   try {
     const { token } = req.cookies;
-    console.log("cooikes ", req.cookies)
 
     if (!token) {
       return res.status(401).send("Please Login!");
     }
-    console.log("getting token from auth: ", token)
-    console.log("cooikes ", req.cookies)
+ 
 
 
     const decodedObj = await jwt.verify(token, process.env.JWT_TOKEN);
