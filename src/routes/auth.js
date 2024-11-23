@@ -53,6 +53,7 @@ authRouter.post("/login", async (req, res) => {
     sameSite: 'None', // Required for cross-origin
         expires: new Date(Date.now() + 8 * 3600000),
       });
+      console.log(req.cookies);
       res.send(user);
     } else {
       throw new Error("Invalid credentials");
@@ -69,7 +70,10 @@ authRouter.post("/logout", async (req, res) => {
     sameSite: 'None', // Required for cross-origin
     expires: new Date(Date.now()),
   });
+  console.log(req.cookies);
+
   res.send("Logout Successful!!");
 });
+
 
 module.exports = authRouter;
