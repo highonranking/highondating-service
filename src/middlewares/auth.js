@@ -9,6 +9,9 @@ const userAuth = async (req, res, next) => {
     if (!token) {
       return res.status(401).send("Please Login!");
     }
+    console.log("getting token from auth: ", token)
+    console.log("cooikes ", req.cookies)
+
 
     const decodedObj = await jwt.verify(token, process.env.JWT_TOKEN);
 
