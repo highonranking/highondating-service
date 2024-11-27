@@ -1,5 +1,6 @@
 const express = require("express");
 const userRouter = express.Router();
+const mongoose = require("mongoose");
 
 const { userAuth } = require("../middlewares/auth");
 const ConnectionRequest = require("../models/connectionRequest");
@@ -78,7 +79,7 @@ userRouter.get("/feed", userAuth, async (req, res) => {
       {
         $match: {
           $and: [
-            { _id: { $nin: Array.from(hideUsersFromFeed) } },
+            { _id: { $nin: Array.from(hideUsersFromFeed).map((id) => new mongoose.Types.ObjectId(id)) } },
             { _id: { $ne: loggedInUser._id } },
           ],
         },
@@ -86,6 +87,7 @@ userRouter.get("/feed", userAuth, async (req, res) => {
       {
         $project: {
           firstName: 1,
+          lastName: 1,
           photoUrl: 1,
           age: 1,
           gender: 1,
@@ -100,7 +102,7 @@ userRouter.get("/feed", userAuth, async (req, res) => {
       },
       { $match: { matchingSkills: { $gte: 3 } } }, 
       { $sort: { matchingSkills: -1 } }, 
-      { $skip: skip },
+      { $skip: skip }, 
       { $limit: limit },
     ]);
 
@@ -109,4 +111,63 @@ userRouter.get("/feed", userAuth, async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 });
+
+
+// WIP
+
+// userRouter.get("/feed", userAuth, async (req, res) => {
+//   try {
+//     const loggedInUser = req.user;
+
+//     const cacheKey = `feed:${loggedInUser._id}:${req.query.page || 1}`;
+//     const cachedFeed = await redis.get(cacheKey);
+//     if (cachedFeed) {
+//       return res.json(JSON.parse(cachedFeed));
+//     }
+
+//     const page = parseInt(req.query.page) || 1;
+//     let limit = parseInt(req.query.limit) || 10;
+//     limit = Math.min(limit, 50);
+//     const skip = (page - 1) * limit;
+
+//     const matchingScores = await UserMatchingScore.find({
+//       user1: loggedInUser._id,
+//       matchingScore: { $gte: 3 },
+//     })
+//       .sort({ matchingScore: -1 })
+//       .skip(skip)
+//       .limit(limit)
+//       .populate("user2", USER_SAFE_DATA);
+
+//     const feed = matchingScores.map((entry) => entry.user2);
+
+//     await redis.set(cacheKey, JSON.stringify(feed), "EX", 600);
+
+//     res.json({ data: feed });
+//   } catch (err) {
+//     res.status(400).json({ message: err.message });
+//   }
+// });
+
+// userRouter.put("/user/skills", userAuth, async (req, res) => {
+//   try {
+//     const loggedInUser = req.user;
+//     const { skills } = req.body;
+
+//     if (!Array.isArray(skills)) {
+//       return res.status(400).send({ message: "Skills must be an array" });
+//     }
+
+//     loggedInUser.skills = skills;
+//     await loggedInUser.save();
+
+//     await updateSkillIndex(loggedInUser._id, skills);
+
+//     res.json({ message: "Skills updated successfully" });
+//   } catch (err) {
+//     res.status(400).send({ message: err.message });
+//   }
+// });
+
+
 module.exports = userRouter;
