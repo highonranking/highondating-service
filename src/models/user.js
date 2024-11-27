@@ -80,6 +80,7 @@ userSchema.methods.getJWT = async function () {
 
   return token;
 };
+userSchema.index({ skills: 1 });
 
 userSchema.methods.validatePassword = async function (passwordInputByUser) {
   const user = this;

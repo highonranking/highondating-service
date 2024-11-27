@@ -63,7 +63,7 @@ userRouter.get("/feed", userAuth, async (req, res) => {
 
     const connectionRequests = await ConnectionRequest.find({
       $or: [{ fromUserId: loggedInUser._id }, { toUserId: loggedInUser._id }],
-    }).select("fromUserId  toUserId");
+    }).select("fromUserId toUserId");
 
     const hideUsersFromFeed = new Set();
     connectionRequests.forEach((req) => {
@@ -71,15 +71,38 @@ userRouter.get("/feed", userAuth, async (req, res) => {
       hideUsersFromFeed.add(req.toUserId.toString());
     });
 
-    const users = await User.find({
-      $and: [
-        { _id: { $nin: Array.from(hideUsersFromFeed) } },
-        { _id: { $ne: loggedInUser._id } },
-      ],
-    })
-      .select(USER_SAFE_DATA)
-      .skip(skip)
-      .limit(limit);
+    const loggedInUserDetails = await User.findById(loggedInUser._id).select("skills");
+    const loggedInUserSkills = loggedInUserDetails.skills || [];
+
+    const users = await User.aggregate([
+      {
+        $match: {
+          $and: [
+            { _id: { $nin: Array.from(hideUsersFromFeed) } },
+            { _id: { $ne: loggedInUser._id } },
+          ],
+        },
+      },
+      {
+        $project: {
+          firstName: 1,
+          photoUrl: 1,
+          age: 1,
+          gender: 1,
+          about: 1,
+          skills: 1,
+          matchingSkills: {
+            $size: {
+              $setIntersection: [loggedInUserSkills, "$skills"],
+            },
+          },
+        },
+      },
+      { $match: { matchingSkills: { $gte: 3 } } }, 
+      { $sort: { matchingSkills: -1 } }, 
+      { $skip: skip },
+      { $limit: limit },
+    ]);
 
     res.json({ data: users });
   } catch (err) {
