@@ -22,7 +22,35 @@ profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
 
     const loggedInUser = req.user;
 
+    const { location } = req.body;
+    console.log("Location from body:", location);
+
+    if (location) {
+      const { coordinates } = location;
+      if (!Array.isArray(coordinates) || coordinates.length !== 2) {
+        throw new Error("Invalid location format. Coordinates must be an array with two numbers.");
+      }
+      const lon = parseFloat(coordinates[0]);  
+      const lat = parseFloat(coordinates[1]);     
     
+      console.log("lat:", lat);
+      console.log("lon:", lon);
+    
+      if (isNaN(lat) || isNaN(lon)) {
+        throw new Error("Invalid location format. Latitude and longitude must be numbers.");
+      }
+
+      if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+        throw new Error("Invalid location values. Latitude must be between -90 and 90, and longitude between -180 and 180.");
+      }
+    
+      req.user.location = {
+        type: "Point",
+        coordinates: [lon, lat] 
+      };
+    }
+
+
     if (req.body.skills) {
       if (!Array.isArray(req.body.skills)) {
         throw new Error("Skills must be an array.");

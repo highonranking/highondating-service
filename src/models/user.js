@@ -28,6 +28,17 @@ const userSchema = new mongoose.Schema(
         }
       },
     },
+    location: {
+      type: {
+        type: String,
+        enum: ['Point'],
+       
+      },
+      coordinates: {
+        type: [Number], 
+       
+      },
+    },
     password: {
       type: String,
       required: true,
@@ -81,6 +92,8 @@ userSchema.methods.getJWT = async function () {
   return token;
 };
 userSchema.index({ skills: 1 });
+userSchema.index({ location: '2dsphere' });
+
 
 userSchema.methods.validatePassword = async function (passwordInputByUser) {
   const user = this;

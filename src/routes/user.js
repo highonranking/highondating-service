@@ -6,7 +6,7 @@ const { userAuth } = require("../middlewares/auth");
 const ConnectionRequest = require("../models/connectionRequest");
 const User = require("../models/user");
 
-const USER_SAFE_DATA = "firstName lastName photoUrl age gender about skills";
+const USER_SAFE_DATA = "firstName lastName photoUrl age gender about skills location";
 
 userRouter.get("/user/requests/received", userAuth, async (req, res) => {
   try {
@@ -57,6 +57,12 @@ userRouter.get("/feed", userAuth, async (req, res) => {
   try {
     const loggedInUser = req.user;
 
+    if (!loggedInUser.location) {
+      throw new Error("User location is not set.");
+    }
+
+    const { coordinates } = loggedInUser.location;
+
     const page = parseInt(req.query.page) || 1;
     let limit = parseInt(req.query.limit) || 10;
     limit = limit > 50 ? 50 : limit;
@@ -77,6 +83,14 @@ userRouter.get("/feed", userAuth, async (req, res) => {
 
     const users = await User.aggregate([
       {
+        $geoNear: {
+          near: { type: "Point", coordinates },
+          distanceField: "distance",
+          maxDistance: 10000, 
+          spherical: true,
+        },
+      },
+      {
         $match: {
           $and: [
             { _id: { $nin: Array.from(hideUsersFromFeed).map((id) => new mongoose.Types.ObjectId(id)) } },
@@ -92,6 +106,7 @@ userRouter.get("/feed", userAuth, async (req, res) => {
           age: 1,
           gender: 1,
           about: 1,
+          location: 1,
           skills: 1,
           matchingSkills: {
             $size: {
