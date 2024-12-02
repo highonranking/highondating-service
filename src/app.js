@@ -20,12 +20,14 @@ const requestRouter = require("./routes/request");
 const userRouter = require("./routes/user");
 const initializeSocket = require('./utils/socketService');
 const messageRoutes = require('./routes/message');
+const mapRouter = require('./routes/map');
 
 app.use("/", authRouter);
 app.use("/", profileRouter);
 app.use("/", requestRouter);
 app.use("/", userRouter);
 app.use('/api/messages', messageRoutes);
+app.use("/api/maps", mapRouter);
 
 
 connectDB()

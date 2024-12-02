@@ -39,6 +39,15 @@ const userSchema = new mongoose.Schema(
        
       },
     },
+    address: {
+      type: String,
+      default: "Address not set",
+      validate(value) {
+        if (value.length > 500) {
+          throw new Error("Address cannot exceed 500 characters.");
+        }
+      },
+    },
     password: {
       type: String,
       required: true,
