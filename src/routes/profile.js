@@ -49,6 +49,12 @@ profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
         coordinates: [lon, lat] 
       };
     }
+    if (req.body.address) {
+      if (typeof req.body.address !== "string" || req.body.address.length > 500) {
+        throw new Error("Invalid address format. It must be a string and under 500 characters.");
+      }
+      loggedInUser.address = req.body.address;
+    }
 
 
     if (req.body.skills) {

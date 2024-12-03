@@ -108,6 +108,7 @@ userRouter.get("/feed", userAuth, async (req, res) => {
           about: 1,
           location: 1,
           skills: 1,
+          address:1,
           matchingSkills: {
             $size: {
               $setIntersection: [loggedInUserSkills, "$skills"],
