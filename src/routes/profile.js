@@ -23,7 +23,6 @@ profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
     const loggedInUser = req.user;
 
     const { location } = req.body;
-    console.log("Location from body:", location);
 
     if (location) {
       const { coordinates } = location;
@@ -33,8 +32,7 @@ profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
       const lon = parseFloat(coordinates[0]);  
       const lat = parseFloat(coordinates[1]);     
     
-      console.log("lat:", lat);
-      console.log("lon:", lon);
+
     
       if (isNaN(lat) || isNaN(lon)) {
         throw new Error("Invalid location format. Latitude and longitude must be numbers.");

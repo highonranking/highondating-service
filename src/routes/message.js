@@ -118,4 +118,38 @@ router.patch('/read',userAuth, async (req, res) => {
     }
   });
 
+  router.put("/mark-as-read", async (req, res) => {
+    const { senderId, receiverId } = req.body;
+  
+    try {
+      const result = await Message.updateMany(
+        { senderId, receiverId, isRead: false },
+        { isRead: true }
+      );
+      res.status(200).json({ message: "Messages marked as read" });
+    } catch (err) {
+      res.status(500).json({ message: "Error marking messages as read" });
+    }
+  });
+
+  router.get("/unread-count", async (req, res) => {
+    const { userId } = req.query;
+    
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+  
+    try {
+      const unreadCount = await Message.countDocuments({
+        senderId: userId,
+        isRead: false,
+      });
+  
+      res.status(200).json({ unreadCount });
+    } catch (err) {
+      console.error("Error fetching unread count:", err);
+      res.status(500).json({ message: "Error fetching unread count" });
+    }
+  });
+  
 module.exports = router;

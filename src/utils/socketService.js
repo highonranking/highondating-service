@@ -22,7 +22,6 @@ const initializeSocket = (server) => {
     socket.on("leave_room", (user1Id, user2Id) => {
       const roomId = [user1Id, user2Id].sort().join("_");
       socket.leave(roomId);
-      console.log(`User ${socket.id} left room: ${roomId}`);
     });
 
     socket.on("disconnect", () => {
