@@ -13,12 +13,6 @@ router.post('/', userAuth, async (req, res) => {
             return res.status(400).json({ message: 'Missing required fields' });
         }
 
-        if (receiverId && !(await isConnected(senderId, receiverId))) {
-            return res
-                .status(403)
-                .json({ message: 'You can only message connected users.' });
-        }
-
         const message = new Message({
             senderId,
             receiverId,
@@ -28,12 +22,10 @@ router.post('/', userAuth, async (req, res) => {
 
         await message.save();
 
-       // const cacheKey = `chat:${senderId}:${receiverId}`;
         const cacheKey1 = `chat:${senderId}:${receiverId}`;
         const cacheKey2 = `chat:${receiverId}:${senderId}`;
         await redisClient.del(cacheKey1);
         await redisClient.del(cacheKey2);
-
 
         const messagesCache = await Message.find({
             $or: [
@@ -44,13 +36,11 @@ router.post('/', userAuth, async (req, res) => {
 
         await redisClient.set(cacheKey1, JSON.stringify(messagesCache), { EX: 60 * 5 }); 
         await redisClient.set(cacheKey2, JSON.stringify(messagesCache), { EX: 60 * 5 }); 
-        if (global.io) {
+
+        const io = req.io; 
+        if (io) {
             const targetRoom = receiverId || groupId;
-            global.io.to(targetRoom).emit('new_message', {
-                ...message.toObject(),
-                senderId,
-                receiverId,
-            });
+            io.to(targetRoom).emit('new_message', message.toObject());
         }
 
         res.status(201).json({ success: true, message });
@@ -70,7 +60,6 @@ router.get('/', userAuth, async (req, res) => {
             return res.status(400).json({ message: 'Missing required parameters' });
         }
 
-        // Check user connection
         if (!groupId && !(await isConnected(userId1, userId2))) {
             return res.status(403).json({ message: 'You can only fetch messages with connected users.' });
                         }
