@@ -1,25 +1,31 @@
-const socketIO = require('socket.io');
-
 const initializeSocket = (server) => {
-  const io = socketIO(server, {
+  const io = require("socket.io")(server, {
     cors: {
-      origin: '*',
+      origin: `${process.env.CLIENT_URL}`,
+      methods: ['GET', 'POST'],
     },
   });
 
-  global.io = io; 
+  io.on("connection", (socket) => {
 
-  io.on('connection', (socket) => {
-
-    socket.on('join_room', (roomId) => {
+    socket.on("join_room", (user1Id, user2Id) => {
+      const roomId = [user1Id, user2Id].sort().join("_");
       socket.join(roomId);
     });
 
-    socket.on('typing', ({ roomId, userId }) => {
-      socket.to(roomId).emit('user_typing', { userId });
+    socket.on("new_message", (message) => {
+      const { senderId, receiverId } = message;
+      const roomId = [senderId, receiverId].sort().join("_");
+      io.to(roomId).emit("new_message", message);
     });
 
-    socket.on('disconnect', () => {
+    socket.on("leave_room", (user1Id, user2Id) => {
+      const roomId = [user1Id, user2Id].sort().join("_");
+      socket.leave(roomId);
+      console.log(`User ${socket.id} left room: ${roomId}`);
+    });
+
+    socket.on("disconnect", () => {
     });
   });
 
